@@ -22,6 +22,7 @@ Train and test the single neuron with the included data. Experiment with differe
 Write several paragraphs reporting the results of your studies. Explain your stopping criterion. Label all graphs and tables.
 * You may implement these classifiers in any computer language you like, but you must do it your self. For homework assignments, do not work in groups and do not share code. Include code listings in your report.
 * 
+
 2) Delta-Rule (LMS)
 =================
 
