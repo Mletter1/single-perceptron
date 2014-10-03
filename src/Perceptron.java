@@ -12,10 +12,10 @@ import javax.swing.*;
  */
 public class Perceptron {
     private Random rnd;
-    private double w0;
-    private double w1;
-    private double w2;
-    private double learningRate;
+    public double w0;
+    public double w1;
+    public double w2;
+    public double learningRate;
     private double x0;
     private int maxIterations;
 
@@ -25,12 +25,15 @@ public class Perceptron {
      */
     Perceptron(){
         this.rnd = new Random();
-        this.w0 = rnd.nextDouble();
-        this.w1 = rnd.nextDouble();
-        this.w2 = rnd.nextDouble();
-        this.learningRate = .25;
+//        this.w0 = rnd.nextDouble();
+//        this.w1 = rnd.nextDouble();
+//        this.w2 = rnd.nextDouble();
+        this.w0 = 0;
+        this.w1 = 0;
+        this.w2 = 0;
+        this.learningRate = 15.85;
         this.x0 = -1;
-        this.maxIterations = 10;
+        this.maxIterations = 30;
 
     }
 
@@ -40,16 +43,16 @@ public class Perceptron {
      * @param samples ArrayList of samples
      */
     public void learn(ArrayList<Sample> samples) {
-        int i;
         int iterations = 0;
         boolean error = true;
 
         double alpha =  (learningRate / 1000);
 
+        //go through the epoche's
         while (error && iterations < maxIterations) {
             error = false;
             Collections.shuffle(samples);
-            //for (i = 0; i <= samples.size() - 1; i++) {
+            //iterate through the epoche
             for(Sample sample : samples) {
                 double x1 = sample.X1;
                 double x2 = sample.X2;
@@ -71,20 +74,20 @@ public class Perceptron {
                 //System.out.println("w0: "+w0+" w1: "+w1+" w2: "+w2 +"\n");
             }
             iterations++;
-            System.out.println("round: " + iterations + " | w0: "+w0+" w1: "+w1+" w2: "+w2 +"\n");
+            System.out.println("epoche: " + iterations + " |\n w0: "+w0+" w1: "+w1+" w2: "+w2 +"\n");
         }
 
     }
 
     /**
      * used to plot all of our data points
-     * @param cls1
-     * @param cls2
+     * @param cls1 class 1
+     * @param cls2 class 2
      */
-    public static void plotClasses(ArrayList<Sample> cls1, ArrayList<Sample> cls2){
+    public static void plotClasses(ArrayList<Sample> cls1, ArrayList<Sample> cls2, Perceptron p){
         // define your data
-        double[] x = {1, 2, 3, 4, 5, 6};
-        double[] y = {45, 89, 6, 32, 63, 12};
+        double[] x;
+        double[] y;
 
         x = new double[cls1.size()];
         y = new double[cls1.size()];
@@ -102,7 +105,20 @@ public class Perceptron {
         plot.addLegend("SOUTH");
 
         // add a line plot to the PlotPanel
-        plot.addScatterPlot("my plot", Color.RED, x, y);
+        plot.addScatterPlot("my plot1", Color.RED, x, y);
+
+
+        double y0=0;
+        double y1=1;
+        double[] linex = {-4,-3,-2,-1,0,1,2,3,4,5};
+        double[] liney = {-4,-3,-2,-1,0,1,2,3,4,5};
+        for (int i = 0; i < linex.length; i++) {
+            liney[i]= ((-p.w1/p.w2)*linex[i])+(p.w0/p.w2);
+        }
+        //add line plot weights
+        plot.addLinePlot("my plot2",Color.GREEN,linex,liney);
+
+
 
         x = new double[cls2.size()];
         y = new double[cls2.size()];
@@ -111,11 +127,11 @@ public class Perceptron {
             x[i]=cls2.get(i).X1;
             y[i]=cls2.get(i).X2;
         }
-        plot.addScatterPlot("my plot", Color.BLUE, x, y);
+        plot.addScatterPlot("my plot3", Color.BLUE, x, y);
 
         // put the PlotPanel in a JFrame like a JPanel
         JFrame frame = new JFrame("a plot panel");
-        frame.setSize(800, 800);
+        frame.setSize(1000, 1000);
         frame.setContentPane(plot);
         frame.setVisible(true);
         frame.setDefaultCloseOperation(frame.EXIT_ON_CLOSE);
@@ -123,8 +139,8 @@ public class Perceptron {
 
     /**
      * used to parse the provided text files
-     * @param f
-     * @param classNumber
+     * @param f file
+     * @param classNumber +-1
      * @return ArrayList of Sample
      */
     public static ArrayList<Sample> parseFile(File f,int classNumber){
@@ -166,13 +182,14 @@ public class Perceptron {
         File f2 = new File("/Users/matthewletter/Documents/single-perceptron/PercepClass2Training.txt");
         ArrayList<Sample> cls2 = parseFile(f2,-1);
 
-        plotClasses(cls1, cls2);
+        //plotClasses(cls1, cls2, p);
 
-        p.learn(cls1);
-        p.learn(cls2);
-        p.learn(cls1);
-        p.learn(cls2);
-        p.learn(cls1);
-        p.learn(cls2);
+        ArrayList<Sample> allClasses = new ArrayList<Sample>();
+        allClasses.addAll(cls1);
+        allClasses.addAll(cls2);
+
+        p.learn(allClasses);
+
+        plotClasses(cls1, cls2, p);
     }
 }
