@@ -284,7 +284,7 @@ public class Perceptron {
             double[] x2 = new double[length];
             double[] y = new double[length];
 
-            
+
             for (int i = 0; i < length; i++) {
                 x1[i] = p.learn(allLearningClasses);
                 x2[i] = p.test(allTestingClasses);
