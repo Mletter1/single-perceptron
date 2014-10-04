@@ -28,9 +28,9 @@ public class Perceptron {
 //        this.w0 = rnd.nextDouble();
 //        this.w1 = rnd.nextDouble();
 //        this.w2 = rnd.nextDouble();
-        this.w0 = 0;
-        this.w1 = 0;
-        this.w2 = 0;
+        this.w0 = 10;
+        this.w1 = 10;
+        this.w2 = 10;
         this.learningRate = .25;
         this.x0 = -1;
         this.maxIterations = 300;
@@ -228,14 +228,14 @@ public class Perceptron {
         File f2 = new File("/Users/matthewletter/Documents/single-perceptron/PercepClass2Training.txt");
         ArrayList<Sample> cls2 = parseFile(f2,-1);
 
-        //plotClasses(cls1, cls2, p);
+        plotClasses(cls1, cls2, p);
 
         ArrayList<Sample> allLearningClasses = new ArrayList<Sample>();
         allLearningClasses.addAll(cls1);
         allLearningClasses.addAll(cls2);
         p.learn(allLearningClasses);
 
-        //plotClasses(cls1, cls2, p);
+        plotClasses(cls1, cls2, p);
 
         /*****************************/
         /*       Testing section     */
@@ -255,7 +255,7 @@ public class Perceptron {
         p.test(allTestingClasses);
 
         generalize(cls1, cls2, allLearningClasses, allTestingClasses);
-        //plotClasses(cls3, cls4, p);
+        plotClasses(cls3, cls4, p);
     }
 
     private static void generalize(ArrayList<Sample> cls1,ArrayList<Sample> cls2,ArrayList<Sample> allLearningClasses,
@@ -265,14 +265,17 @@ public class Perceptron {
 
         // define the legend position
         plot.addLegend("SOUTH");
+        double learningRate = 1;
         for (int j = 0; j < 100; j++) {
             Perceptron p = new Perceptron();
-            p.w0 = p.rnd.nextDouble();
-            p.w1 = p.rnd.nextDouble();
-            p.w2 = p.rnd.nextDouble();
+//            p.w0 = p.rnd.nextDouble();
+//            p.w1 = p.rnd.nextDouble();
+//            p.w2 = p.rnd.nextDouble();
             p.maxIterations = 1;
+            p.learningRate = learningRate;
+            learningRate+=0.25;
             System.out.println("starting| w0:" + p.w0 + " w1:" + p.w1 + " w2:" + p.w2);
-            int length = 100;
+            int length = 30;
 
 
 
@@ -281,11 +284,12 @@ public class Perceptron {
             double[] x2 = new double[length];
             double[] y = new double[length];
 
-
+            
             for (int i = 0; i < length; i++) {
                 x1[i] = p.learn(allLearningClasses);
                 x2[i] = p.test(allTestingClasses);
                 y[i] = i;
+                p.learningRate +=1;
             }
             plot.addLinePlot("learning", Color.BLUE, y, x1);
             plot.addLinePlot("testing", Color.RED, y, x2);
