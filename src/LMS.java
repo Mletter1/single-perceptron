@@ -1,16 +1,17 @@
+import org.math.plot.Plot2DPanel;
+
+import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.*;
-import org.math.plot.*;
-
-import javax.swing.*;
+import java.util.ArrayList;
+import java.util.Random;
+import java.util.Scanner;
 
 /**
- * Created by matthewletter on 9/30/14.
- * this class is designed to represent the single layer perceptron
+ * Created by matthewletter on 10/5/14.
  */
-public class Perceptron {
+public class LMS {
     public Random rnd;
     public double w0;
     public double w1;
@@ -23,14 +24,14 @@ public class Perceptron {
     /**
      * this constructor build our random weights and sets learning rate and learning iterations
      */
-    Perceptron(){
+    LMS(){
         this.rnd = new Random(System.currentTimeMillis());
 //        this.w0 = rnd.nextDouble();
 //        this.w1 = rnd.nextDouble();
 //        this.w2 = rnd.nextDouble();
-        this.w0 = 0;
-        this.w1 = 0;
-        this.w2 = 0;
+        this.w0 = 1;
+        this.w1 = 1;
+        this.w2 = 1;
         this.learningRate = .25;
         this.x0 = -1;
         this.maxIterations = 300;
@@ -55,26 +56,29 @@ public class Perceptron {
         while (error && iterations < maxIterations) {
             errorVal = 0;
             errorSumSqr = 0;
-            error = false;
+            //error = false;
             //Collections.shuffle(samples);
             //iterate through the epoche
             for(Sample sample : samples) {
                 double x1 = sample.X1;
                 double x2 = sample.X2;
                 int y;
+                double y0;
 
                 if (((w1 * x1) + (w2 * x2) - w0) < 0) {
                     y = -1;
                 } else {
                     y = 1;
                 }
-
-                if (y != sample.expectedClass) {
+                y0=(w1 * x1) + (w2 * x2) - w0;
+                if(y != sample.expectedClass){
                     error = true;
                     errorSumSqr += (sample.expectedClass - y)*(sample.expectedClass - y);
-                    w0 = w0 + alpha * (sample.expectedClass - y) * x0 / 2;
-                    w1 = w1 + alpha * (sample.expectedClass - y) * x1 / 2;
-                    w2 = w2 + alpha * (sample.expectedClass - y) * x2 / 2;
+                }
+                if ((sample.expectedClass - y0)!=0) {
+                    w0 = w0 + alpha * (sample.expectedClass - y0) * x0 / 2;
+                    w1 = w1 + alpha * (sample.expectedClass - y0) * x1 / 2;
+                    w2 = w2 + alpha * (sample.expectedClass - y0) * x2 / 2;
                 }
                 //System.out.println("w0: "+w0+" w1: "+w1+" w2: "+w2 +"\n");
             }
@@ -94,30 +98,30 @@ public class Perceptron {
         double n = samples.size();
 
         //go through the epoche's
-            errorVal = 0;
-            errorSumSqr = 0;
+        errorVal = 0;
+        errorSumSqr = 0;
 
-            //iterate through the epoche
-            for(Sample sample : samples) {
-                double x1 = sample.X1;
-                double x2 = sample.X2;
-                int y;//output
+        //iterate through the epoche
+        for(Sample sample : samples) {
+            double x1 = sample.X1;
+            double x2 = sample.X2;
+            int y;//output
 
-                if (((w1 * x1) + (w2 * x2) - w0) < 0) {
-                    y = -1;
-                } else {
-                    y = 1;
-                }
-                if (y != sample.expectedClass) {
-                    errorSumSqr += (sample.expectedClass - y)*(sample.expectedClass - y);
-                }
-                //System.out.println("w0: "+w0+" w1: "+w1+" w2: "+w2 +"\n");
+            if (((w1 * x1) + (w2 * x2) - w0) < 0) {
+                y = -1;
+            } else {
+                y = 1;
             }
-            errorVal = Math.sqrt(errorSumSqr/n);
+            if (y != sample.expectedClass) {
+                errorSumSqr += (sample.expectedClass - y)*(sample.expectedClass - y);
+            }
+            //System.out.println("w0: "+w0+" w1: "+w1+" w2: "+w2 +"\n");
+        }
+        errorVal = Math.sqrt(errorSumSqr/n);
 
-            System.out.println("Test: " + iterations + " |\n w0: "+w0+" w1: "+w1+" w2: "+w2 +" RMS error: " +
-                    errorVal);
-            return errorVal;
+        System.out.println("Test: " + iterations + " |\n w0: "+w0+" w1: "+w1+" w2: "+w2 +" RMS error: " +
+                errorVal);
+        return errorVal;
     }
 
 
@@ -197,8 +201,8 @@ public class Perceptron {
             while(scanner.hasNext()){
                 sA = s.split(" ");
                 if(sA.length==3)
-                samples.add(new Sample(Integer.parseInt(sA[0]), Double.parseDouble(sA[1]), Double.parseDouble(sA[2]),
-                        classNumber));
+                    samples.add(new Sample(Integer.parseInt(sA[0]), Double.parseDouble(sA[1]), Double.parseDouble(sA[2]),
+                            classNumber));
                 s = scanner.nextLine();
             }
             scanner.close();
@@ -214,7 +218,7 @@ public class Perceptron {
      * @param args not used
      */
     public static void main(String[] args){
-        Perceptron p = new Perceptron();
+        LMS p = new LMS();
 
         /*****************************/
         /*     Training section      */
@@ -259,21 +263,21 @@ public class Perceptron {
     }
 
     private static void generalize(ArrayList<Sample> cls1,ArrayList<Sample> cls2,ArrayList<Sample> allLearningClasses,
-                                    ArrayList<Sample> allTestingClasses) {
+                                   ArrayList<Sample> allTestingClasses) {
         // create your PlotPanel (you can use it as a JPanel)
         Plot2DPanel plot = new Plot2DPanel();
         // define the legend position
         plot.addLegend("SOUTH");
-        double learningRate = .25;
+        double learningRate = 1.25;
         for (int j = 0; j < 50; j++) {
-            Perceptron p = new Perceptron();
+            LMS p = new LMS();
             p.w0 = p.rnd.nextDouble();
             p.w1 = p.rnd.nextDouble();
             p.w2 = p.rnd.nextDouble();
             p.maxIterations = 1;
             p.learningRate = learningRate;
             System.out.println("starting| w0:" + p.w0 + " w1:" + p.w1 + " w2:" + p.w2);
-            int length = 100;
+            int length = 50;
 
 
 
@@ -299,6 +303,4 @@ public class Perceptron {
         frame.setVisible(true);
         frame.setDefaultCloseOperation(frame.EXIT_ON_CLOSE);
     }
-
-
 }
