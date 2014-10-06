@@ -5,6 +5,7 @@ import java.awt.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -34,7 +35,7 @@ public class LMS {
         this.w2 = 1;
         this.learningRate = .25;
         this.x0 = -1;
-        this.maxIterations = 300;
+        this.maxIterations = 600;
 
     }
 
@@ -46,24 +47,28 @@ public class LMS {
     public double learn(ArrayList<Sample> samples) {
         int iterations = 0;
         boolean error = true;
-        double errorVal=0;
+        double errorVal=10;
+        double errorValOld = 0;
         double errorSumSqr;
         double n = samples.size();
+        int y = 0;
+        double y0 = 0;
 
         double alpha =  (learningRate / 1000);
 
         //go through the epoche's
         while (error && iterations < maxIterations) {
+
+            errorValOld = errorVal;
             errorVal = 0;
             errorSumSqr = 0;
-            //error = false;
-            //Collections.shuffle(samples);
+
+            Collections.shuffle(samples);
             //iterate through the epoche
             for(Sample sample : samples) {
                 double x1 = sample.X1;
                 double x2 = sample.X2;
-                int y;
-                double y0;
+                error = false;
 
                 if (((w1 * x1) + (w2 * x2) - w0) < 0) {
                     y = -1;
@@ -72,9 +77,9 @@ public class LMS {
                 }
                 y0=(w1 * x1) + (w2 * x2) - w0;
                 if(y != sample.expectedClass){
-                    error = true;
                     errorSumSqr += (sample.expectedClass - y)*(sample.expectedClass - y);
                 }
+
                 if ((sample.expectedClass - y0)!=0) {
                     w0 = w0 + alpha * (sample.expectedClass - y0) * x0 / 2;
                     w1 = w1 + alpha * (sample.expectedClass - y0) * x1 / 2;
@@ -82,9 +87,15 @@ public class LMS {
                 }
                 //System.out.println("w0: "+w0+" w1: "+w1+" w2: "+w2 +"\n");
             }
+
             iterations++;
             errorVal = Math.sqrt(errorSumSqr/n);
 
+            if( (errorValOld - errorVal) > 0.00001) {
+                error = true;
+            }
+
+            System.out.println(errorValOld +" : "+ (errorValOld - errorVal));
             System.out.println("epoche: " + iterations + " |\n w0: "+w0+" w1: "+w1+" w2: "+w2 +" RMS error: " +
                     errorVal);
         }
@@ -130,7 +141,7 @@ public class LMS {
      * @param cls1 class 1
      * @param cls2 class 2
      */
-    public static void plotClasses(ArrayList<Sample> cls1, ArrayList<Sample> cls2, Perceptron p){
+    public static void plotClasses(ArrayList<Sample> cls1, ArrayList<Sample> cls2, LMS p){
         // define your data
         double[] x;
         double[] y;
@@ -225,11 +236,11 @@ public class LMS {
         /*****************************/
 
         //class 1
-        File f1 = new File("/Users/matthewletter/Documents/single-perceptron/PercepClass1Training.txt");
+        File f1 = new File("/Users/matthewletter/Documents/single-perceptron/DeltaRuleClass1Training.txt");
         ArrayList<Sample> cls1 = parseFile(f1,1);
 
         //class 2
-        File f2 = new File("/Users/matthewletter/Documents/single-perceptron/PercepClass2Training.txt");
+        File f2 = new File("/Users/matthewletter/Documents/single-perceptron/DeltaRuleClass2Training.txt");
         ArrayList<Sample> cls2 = parseFile(f2,-1);
 
         //plotClasses(cls1, cls2, p);
@@ -268,16 +279,16 @@ public class LMS {
         Plot2DPanel plot = new Plot2DPanel();
         // define the legend position
         plot.addLegend("SOUTH");
-        double learningRate = 1.25;
-        for (int j = 0; j < 50; j++) {
+        double learningRate = .25;
+        for (int j = 0; j < 100; j++) {
             LMS p = new LMS();
             p.w0 = p.rnd.nextDouble();
             p.w1 = p.rnd.nextDouble();
             p.w2 = p.rnd.nextDouble();
             p.maxIterations = 1;
-            p.learningRate = learningRate;
+            p.learningRate = learningRate +=.25;
             System.out.println("starting| w0:" + p.w0 + " w1:" + p.w1 + " w2:" + p.w2);
-            int length = 50;
+            int length = 6;
 
 
 
