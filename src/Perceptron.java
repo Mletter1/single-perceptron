@@ -274,10 +274,6 @@ public class Perceptron {
             p.learningRate = learningRate;
             System.out.println("starting| w0:" + p.w0 + " w1:" + p.w1 + " w2:" + p.w2);
             int length = 100;
-
-
-
-
             double[] x1 = new double[length];
             double[] x2 = new double[length];
             double[] y = new double[length];
